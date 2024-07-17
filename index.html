@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Library</title>
+</head>
+<body>
+    <h1>Welcome to PDF Library</h1>
+    <ul id="pdf-list"></ul>
+    <input type="file" id="file-input" accept=".pdf">
+    <button id="upload-btn">Upload PDF</button>
+
+    <script>
+        const pdfList = document.getElementById('pdf-list');
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+
+        // Function to display PDF files
+        function displayPDFs() {
+            fetch('/pdfs')
+                .then(response => response.json())
+                .then(pdfs => {
+                    pdfList.innerHTML = '';
+                    pdfs.forEach(pdf => {
+                        const li = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = `pdfs/${pdf}`;
+                        link.textContent = pdf;
+                        link.target = '_blank';
+                        li.appendChild(link);
+                        pdfList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error fetching PDFs:', error));
+        }
+
+        // Display initial list of PDFs
+        displayPDFs();
+
+        // Upload PDF file
+        uploadBtn.addEventListener('click', () => {
+            const formData = new FormData();
+            formData.append('pdf', fileInput.files[0]);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('PDF uploaded successfully');
+                    displayPDFs(); // Update PDF list after upload
+                } else {
+                    console.error('Failed to upload PDF');
+                }
+            })
+            .catch(error => console.error('Error uploading PDF:', error));
+        });
+    </script>
+</body>
+</html>
